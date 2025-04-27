@@ -1,0 +1,17 @@
+# Google Sheets e Google Drive
+gspread==6.2.0
+google-auth==2.28.0
+google-api-python-client==2.127.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.0
+
+# Manipulação de dados
+pandas==2.2.2
+numpy==1.26.4
+
+# Supabase Python SDK
+supabase==1.0.3  # Deixe o httpx ser instalado por essa lib
+
+# Utilitários (opcional)
+python-dotenv==1.0.1
+supabase
