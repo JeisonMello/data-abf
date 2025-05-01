@@ -2,7 +2,7 @@ import gspread
 import pandas as pd
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -57,15 +57,22 @@ if df.empty:
     print("⚠️ Nenhum dado válido. Encerrando.")
     exit(0)
 
-# === ADICIONA TIMESTAMP E SHIFT ===
+# === ADICIONA TIMESTAMP, SHIFT e SHIFT_DATE ===
 agora_sydney = datetime.now(ZoneInfo("Australia/Sydney"))
 df["extraction_date"] = agora_sydney.strftime("%Y-%m-%d %H:%M:%S")
 
-# Regra: 13:30 => AM, 23:30 => PM
 hora = agora_sydney.hour
 minuto = agora_sydney.minute
-shift = "AM" if hora == 13 else "PM"
+
+# SHIFT
+shift = "AM" if hora == 23 else "PM"
 df["shift"] = shift
+
+# SHIFT_DATE
+shift_date = agora_sydney.date()
+if hora == 23 and minuto >= 30:
+    shift_date += timedelta(days=1)
+df["shift_date"] = shift_date.strftime("%Y-%m-%d")
 
 # === EXPORTA PARA CSV ===
 filename = agora_sydney.strftime(f"%Y-%m-%d_%H-%M_{shift}_allocation.csv")
