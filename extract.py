@@ -1,6 +1,6 @@
 import gspread
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from supabase import create_client, Client
 import os
 import json
@@ -70,11 +70,20 @@ def determinar_shift(horario):
 
 df["shift"] = df["Start Time"].apply(determinar_shift)
 
+# === shift_date ===
+hora = agora.hour
+minuto = agora.minute
+shift_date = agora.date()
+if hora == 23 and minuto >= 30:
+    shift_date += timedelta(days=1)
+
+df["shift_date"] = shift_date.strftime("%Y-%m-%d")
+
 # === ORGANIZAÇÃO FINAL ===
 df = df[[
     "Store #", "Store", "Route ID", "Drops", "KM", "Weight", "Start Time",
     "Finish Time", "Main Suburbs", "Windows", "Dock", "Total Hours", "Rego",
-    "ID", "Driver", "Driver Mobile", "Max Payload", "extraction_date", "shift"
+    "ID", "Driver", "Driver Mobile", "Max Payload", "extraction_date", "shift", "shift_date"
 ]]
 
 # === ENVIO PARA SUPABASE ===
