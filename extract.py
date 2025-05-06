@@ -8,6 +8,7 @@ import uuid
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
+from zoneinfo import ZoneInfo
 
 # === CONFIG ===
 SUPABASE_URL = "https://ycmedsqrgxitwjoudqkc.supabase.co"
@@ -55,28 +56,21 @@ if df.empty:
     print("⚠️ Nenhum dado válido.")
     exit(0)
 
-# === SHIFT E DATA ===
-agora = datetime.now()
-df["extraction_date"] = agora.strftime("%Y-%m-%d %H:%M:%S")
+# === SHIFT E DATAS ===
+agora_sydney = datetime.now(ZoneInfo("Australia/Sydney"))
+df["extraction_date"] = agora_sydney.strftime("%Y-%m-%d %H:%M:%S")
 
+hora = agora_sydney.hour
+minuto = agora_sydney.minute
 
-def determinar_shift(horario):
-    try:
-        return "AM" if datetime.strptime(horario.strip(),
-                                         "%H:%M").hour < 12 else "PM"
-    except:
-        return "AM"
-
-
-df["shift"] = df["Start Time"].apply(determinar_shift)
-
-# === shift_date ===
-hora = agora.hour
-minuto = agora.minute
-shift_date = agora.date()
 if hora == 23 and minuto >= 30:
-    shift_date += timedelta(days=1)
+    shift = "AM"
+    shift_date = (agora_sydney + timedelta(days=1)).date()
+else:
+    shift = "PM"
+    shift_date = agora_sydney.date()
 
+df["shift"] = shift
 df["shift_date"] = shift_date.strftime("%Y-%m-%d")
 
 # === ORGANIZAÇÃO FINAL ===
@@ -106,7 +100,7 @@ for index, row in df.iterrows():
             print("📦 Dados:", registro)
 
 # === BACKUP CSV ===
-nome_csv = f"{agora.strftime('%Y-%m-%d_%H-%M')}_{df['shift'].iloc[0]}_allocation.csv"
+nome_csv = f"{agora_sydney.strftime('%Y-%m-%d_%H-%M')}_{shift}_allocation.csv"
 try:
     df.to_csv(nome_csv, index=False)
     media = MediaFileUpload(nome_csv, mimetype="text/csv")
