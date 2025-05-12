@@ -100,7 +100,7 @@ for index, row in df.iterrows():
             print("📦 Dados:", registro)
 
 # === BACKUP CSV ===
-nome_csv = f"{agora_sydney.strftime('%Y-%m-%d_%H-%M')}_{shift}_allocation.csv"
+nome_csv = f"{shift_date.strftime('%Y-%m-%d')}_{agora_sydney.strftime('%H-%M')}_{shift}_allocation.csv"
 try:
     df.to_csv(nome_csv, index=False)
     media = MediaFileUpload(nome_csv, mimetype="text/csv")
